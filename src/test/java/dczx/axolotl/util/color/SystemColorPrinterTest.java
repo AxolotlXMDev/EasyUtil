@@ -14,7 +14,7 @@ class SystemColorPrinterTest {
     @Test
     void print() {
         // 使用默认颜色（蓝色）
-        logger.println("这是一条默认颜色的消息");
+        logger.setDEFAULT_COLOR(ColoredPrinter.Color.GREEN).println("这是一条默认颜色的消息");
         logger.printlnf("用户 %s 登录，ID: %d", "Alice", 1001);
 
         // 指定不同颜色

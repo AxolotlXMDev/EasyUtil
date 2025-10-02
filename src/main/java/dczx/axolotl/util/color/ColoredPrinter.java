@@ -12,6 +12,11 @@ import java.io.PrintStream;
 public abstract class ColoredPrinter {
     public Color DEFAULT_COLOR = Color.GREEN;
 
+    public ColoredPrinter setDEFAULT_COLOR(Color DEFAULT_COLOR) {
+        this.DEFAULT_COLOR = DEFAULT_COLOR;
+        return this;
+    }
+
     public enum Color {
         RESET("\u001B[0m"),
         GREEN("\u001B[32m"),
@@ -79,9 +84,11 @@ public abstract class ColoredPrinter {
     public void printf(String format, Object... args) {
         printf(DEFAULT_COLOR, format, args);
     }
+
     public void println(String msg) {
         println(DEFAULT_COLOR, msg);
     }
+
     public void printlnf(String format, Object... args) {
         printlnf(DEFAULT_COLOR, format, args);
     }

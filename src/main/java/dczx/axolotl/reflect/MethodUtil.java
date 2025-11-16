@@ -2,6 +2,7 @@ package dczx.axolotl.reflect;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /**
  * @author AxolotlXM
@@ -53,15 +54,27 @@ public class MethodUtil {
      *
      * @param clazz      要查找方法的类
      * @param methodName 方法名称
-     * @param args       方法的参数，用于匹配方法签名
+     * @param args   方法的参数，用于匹配方法签名
      * @return 匹配的方法对象
      * @throws IllegalArgumentException 如果未找到匹配的方法
      */
-    public static Method findMethod(Class<?> clazz, String methodName, Object... args) {
+    public static Method findMethodByObjects(Class<?> clazz, String methodName, Object... args) {
+        return findMethodByClasses(clazz, methodName, Arrays.stream(args).map(Object::getClass).toArray(Class<?>[]::new));
+    }
+
+    /**
+     * 查找指定类中名称匹配且参数兼容的方法。
+     *
+     * @param clazz      要查找方法的类
+     * @param methodName 方法名称
+     * @param argTypes   方法的参数类型，用于匹配方法签名
+     * @return 匹配的方法对象
+     * @throws IllegalArgumentException 如果未找到匹配的方法
+     */
+    public static Method findMethodByClasses(Class<?> clazz, String methodName, Class<?>... argTypes) {
         for (Method method : clazz.getMethods()) {
             if (method.getName().equals(methodName)) {
-                Class<?>[] paramTypes = method.getParameterTypes();
-                if (isCompatible(method, args)) {
+                if (isCompatible(method, argTypes)) {
                     return method;
                 }
             }
@@ -72,37 +85,36 @@ public class MethodUtil {
     /**
      * 检查方法的参数类型是否与给定参数兼容。
      *
-     * @param method 要检查的目标方法
-     * @param args   给定的参数
+     * @param method   要检查的目标方法
+     * @param argTypes 给定的参数类型
      * @return 如果参数兼容则返回 true，否则返回 false
      */
-    private static boolean isCompatible(Method method, Object[] args) {
+    private static boolean isCompatible(Method method, Class<?>[] argTypes) {
         Class<?>[] paramTypes = method.getParameterTypes();
-        if (paramTypes.length == 0) return args.length == 0;
+        if (paramTypes.length == 0) return argTypes.length == 0;
 
         // 如果最后一个参数是 varargs
         boolean isVarArgs = method.isVarArgs();
         int fixedParamCount = isVarArgs ? paramTypes.length - 1 : paramTypes.length;
 
-        if (args.length < fixedParamCount) return false;
-        if (!isVarArgs && args.length != paramTypes.length) return false;
+        if (argTypes.length < fixedParamCount) return false;
+        if (!isVarArgs && argTypes.length != paramTypes.length) return false;
 
         // 检查固定参数类型
         for (int i = 0; i < fixedParamCount; i++) {
-            if (!isAssignable(paramTypes[i], args[i])) {
+            if (!isAssignable(paramTypes[i], argTypes[i])) {
                 return false;
             }
         }
 
         if (isVarArgs) {
             Class<?> varArgType = paramTypes[paramTypes.length - 1].getComponentType(); // 注意：是 componentType！
-            for (int i = fixedParamCount; i < args.length; i++) {
-                if (!isAssignable(varArgType, args[i])) {
+            for (int i = fixedParamCount; i < argTypes.length; i++) {
+                if (!isAssignable(varArgType, argTypes[i])) {
                     return false;
                 }
             }
         }
-
         return true;
     }
 
@@ -124,14 +136,13 @@ public class MethodUtil {
      * 检查给定的参数是否可以分配给目标类型。
      *
      * @param targetType 目标类型
-     * @param arg        给定的参数
+     * @param argType    给定的参数类型
      * @return 如果参数可以分配给目标类型则返回 true，否则返回 false
      */
-    private static boolean isAssignable(Class<?> targetType, Object arg) {
-        if (arg == null) {
+    private static boolean isAssignable(Class<?> targetType, Class<?> argType) {
+        if (argType == null) {
             return !targetType.isPrimitive();
         }
-        Class<?> argType = arg.getClass();
 
         // 如果目标类型是基本类型，检查 arg 是否是对应的包装类
         if (targetType.isPrimitive()) {

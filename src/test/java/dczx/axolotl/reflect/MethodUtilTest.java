@@ -37,7 +37,7 @@ class MethodUtilTest {
     @DisplayName("Should invoke PrintStream.printf with varargs correctly")
     void testPrintfWithVarargs() throws Exception {
         PrintStream out = System.out;
-        Method method = MethodUtil.findMethod(out.getClass(), "printf", "Hello %s %d", "World", 42);
+        Method method = MethodUtil.findMethodByObjects(out.getClass(), "printf", "Hello %s %d", "World", 42);
         MethodUtil.invokeWithVarargs(out, method, "Hello %s %d", "World", 42);
 
         String output = testOut.toString().trim();
@@ -48,7 +48,7 @@ class MethodUtilTest {
     @DisplayName("Should invoke normal non-varargs method")
     void testNormalMethod() throws Exception {
         String str = "  hello  ";
-        Method method = MethodUtil.findMethod(str.getClass(), "trim");
+        Method method = MethodUtil.findMethodByObjects(str.getClass(), "trim");
         Object result = MethodUtil.invokeWithVarargs(str, method);
         assertEquals("hello", result);
     }
@@ -57,7 +57,7 @@ class MethodUtilTest {
     @DisplayName("Should handle varargs with primitive types (via helper class)")
     void testVarargsWithPrimitives() throws Exception {
         VarArgsHelper helper = new VarArgsHelper();
-        Method method = MethodUtil.findMethod(helper.getClass(), "sum", 1, 2, 3);
+        Method method = MethodUtil.findMethodByObjects(helper.getClass(), "sum", 1, 2, 3);
         Object result = MethodUtil.invokeWithVarargs(helper, method, 1, 2, 3);
         assertEquals(6, result);
     }
@@ -66,7 +66,7 @@ class MethodUtilTest {
     @DisplayName("Should invoke no-argument method")
     void testNoArgsMethod() throws Exception {
         Object obj = new Object();
-        Method method = MethodUtil.findMethod(obj.getClass(), "toString");
+        Method method = MethodUtil.findMethodByObjects(obj.getClass(), "toString");
         assertNotNull(MethodUtil.invokeWithVarargs(obj, method));
     }
 
@@ -75,7 +75,7 @@ class MethodUtilTest {
     void testMethodNotFound() {
         IllegalArgumentException exception = assertThrows(
                 IllegalArgumentException.class,
-                () -> MethodUtil.findMethod(String.class, "nonExistentMethod", "arg")
+                () -> MethodUtil.findMethodByObjects(String.class, "nonExistentMethod", "arg")
         );
         assertTrue(exception.getMessage().contains("No such method"));
     }
@@ -84,7 +84,7 @@ class MethodUtilTest {
     @DisplayName("Should handle zero varargs (empty array)")
     void testZeroVarargs() throws Exception {
         PrintStream out = System.out;
-        Method method = MethodUtil.findMethod(out.getClass(), "printf", "No args");
+        Method method = MethodUtil.findMethodByObjects(out.getClass(), "printf", "No args");
         MethodUtil.invokeWithVarargs(out, method, "No args");
 
         String output = testOut.toString().trim();

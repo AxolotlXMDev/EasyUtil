@@ -4,6 +4,7 @@ import dczx.axolotl.util.BufferReaderUtil;
 import lombok.SneakyThrows;
 
 import java.io.*;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -36,6 +37,19 @@ public class ExecUtil {
         return exec(command, runPath, isBlank, null, null, null);
     }
 
+    /**
+     * 异步运行命令
+     *
+     * @param command 命令
+     * @param runPath 运行路径
+     * @param isBlock 是否阻塞主线程
+     */
+    public static Process exec(String command, String runPath, boolean isBlock,
+                               ParameterRunnable<String> output,
+                               ParameterRunnable<String> errOutput,
+                               ParameterRunnable<Integer> exitCode) {
+       return exec(List.of(command.split(" ")), runPath, isBlock, output, errOutput, exitCode);
+    }
 
     /**
      * 异步运行命令
@@ -48,14 +62,18 @@ public class ExecUtil {
      * @param exitCode  退出码
      */
     @SneakyThrows
-    public static Process exec(String command, String runPath, boolean isBlock,
+    public static Process exec(List<String> command, String runPath, boolean isBlock,
                                ParameterRunnable<String> output,
                                ParameterRunnable<String> errOutput,
                                ParameterRunnable<Integer> exitCode) {
-        Process process = Runtime.getRuntime().exec(command, null, new File(runPath));
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        processBuilder.directory(new File(runPath));
+        processBuilder.command(command);
+        Process process = processBuilder.start();
+        // process = Runtime.getRuntime().exec(command, null, new File(runPath));
         BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
         BufferedReader errReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-        //是空的就不运行了 防止性能的浪费
+        // 读取输出和错误流
         if (output != null)
             BufferReaderUtil.autoReadLineSync(reader, output);
 

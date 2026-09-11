@@ -253,6 +253,7 @@ public class FilesUtil {
         });
         folderCount.decrementAndGet();//-1 因为不计数自身
         return new FolderDataNoFiles(path, size.get(), fileCount.get(), folderCount.get());
+
     }
 
 }

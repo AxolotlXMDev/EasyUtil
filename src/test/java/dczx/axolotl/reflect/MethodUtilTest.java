@@ -8,6 +8,8 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -81,6 +83,15 @@ class MethodUtilTest {
     }
 
     @Test
+    @DisplayName("")
+    void test() {
+        List<?> objects = Arrays.asList(1, 2, 3);
+        Class<?>[] parameterTypes = objects.stream().map(Object::getClass).toArray(Class<?>[]::new);
+        Method formatted = MethodUtil.findMethodByClasses(String.class, "formatted",parameterTypes);
+        System.out.println("formatted = " + formatted);
+    }
+
+    @Test
     @DisplayName("Should handle zero varargs (empty array)")
     void testZeroVarargs() throws Exception {
         PrintStream out = System.out;
@@ -99,4 +110,5 @@ class MethodUtilTest {
             return total;
         }
     }
+
 }
